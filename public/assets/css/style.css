@@ -622,14 +622,14 @@ section {
 /*--------------------------------------------------------------
 # Portfolio
 --------------------------------------------------------------*/
-.portfolio #portfolio-flters {
+.portfolio olio-flters {
   padding: 0;
   margin: 0 auto 50px auto;
   list-style: none;
   text-align: center;
 }
 
-.portfolio #portfolio-flters li {
+.portfolio olio-flters li {
   cursor: pointer;
   display: inline-block;
   padding: 8px 20px 10px 20px;
@@ -642,12 +642,12 @@ section {
   border-radius: 4px;
 }
 
-.portfolio #portfolio-flters li:hover, .portfolio #portfolio-flters li.filter-active {
+.portfolio olio-flters li:hover, .portfolio olio-flters li.filter-active {
   color: #fff;
   background: #1bbd36;
 }
 
-.portfolio #portfolio-flters li:last-child {
+.portfolio olio-flters li:last-child {
   margin-right: 0;
 }
 
@@ -810,7 +810,6 @@ section {
   }
 }
 
-
 /*--------------------------------------------------------------
 # Clients
 --------------------------------------------------------------*/
@@ -957,7 +956,11 @@ section {
 .team .member:hover .social {
   opacity: 1;
 }
-
+ .center {
+            margin: auto;
+            width: 60%;
+            padding: 10px;
+          }
 /*--------------------------------------------------------------
 # Our Skills
 --------------------------------------------------------------*/

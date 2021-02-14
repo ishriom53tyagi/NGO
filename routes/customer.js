@@ -385,6 +385,91 @@ router.post('/customer/deletegallery', restrict,async function(req,res) {
         return;
     }
 });
+router.get('/admin/ourachievements', restrict,async (req,res)=>
+{
+    const db = req.app.db;
+    var item = await db.ourachievements.find({}).toArray();
+   
+    res.render('ourachievements', {
+        title: 'Edit product',
+        admin: true,
+        session: req.session,
+        ourachievements: item,
+        message: common.clearSessionValue(req.session, 'message'),
+        messageType: common.clearSessionValue(req.session, 'messageType'),
+        config: req.app.config,
+        editor: true,
+        helpers: req.handlebars.helpers
+    });
+})
+router.post('/customer/ourachievements', restrict,upload2.array('uploadFile'),async (req,res)=>
+{
+    const config = req.app.config;
+    const db = req.app.db;
+    
+    var files = req.files;
+
+    if(files.length < 1) {
+        req.session.message = "All Files Required";
+        req.session.messageType = 'danger';
+        res.redirect('/customer/register');
+        return;
+    } 
+            try{
+                    cloudinary.uploader.upload(files[0].path,
+                        async function(error, result) {
+                            if(result){
+                                console.log(result);
+                                var json_String = JSON.stringify(result);
+                                var obj = JSON.parse(json_String);
+                                console.log(files[0])
+                                var uploadobj = {
+                                    id: obj.public_id,
+                                    path : obj.secure_url,
+                                    type: obj.format,
+                                    isVideo:false,
+                                    text:req.body.name
+                                    
+                                };
+                                
+                                await db.ourachievements.insertOne(uploadobj);
+                                fs.unlinkSync(files[0].path);
+                            }
+                            else {
+                                fs.unlinkSync(files[0].path);
+                            }
+                        });
+                    res.redirect('/admin/ourachievements');
+            }catch(ex){
+                console.error(colors.red('Failed to insert customer: ', ex));
+                res.status(400).json({
+                    message: 'Error uploading .'
+                });
+            }
+});
+router.post('/customer/deleteourachievements', restrict,async function(req,res) {
+    const db = req.app.db;
+    if(!req.body.id) {
+        req.session.message = "Id not available";
+        req.session.messageType = 'danger';
+        res.redirect('/admin/ourachievements');
+        return;
+    }
+    try{
+        await db.ourachievements.deleteOne({_id: getId(req.body.id)});
+        req.session.message = "Achievement Item successfully Deleted";
+        req.session.messageType = 'success';
+        res.redirect('/admin/ourachievements');
+        return;
+    }
+    catch(ex){
+        req.session.message = "Achievement Item deletion failed";
+        req.session.messageType = 'danger';
+        res.redirect('/admin/ourachievements');
+        return;
+    }
+});
+
 router.post("/customer/youtube", restrict,async function(req,res)
 {
     const config = req.app.config;
@@ -402,6 +487,24 @@ router.post("/customer/youtube", restrict,async function(req,res)
             console.log(ex);
         }
 res.redirect('/admin/gallery');
+})
+router.post("/customer/youtube", restrict,async function(req,res)
+{
+    const config = req.app.config;
+    const db = req.app.db;
+     try{
+                var uploadobj = {
+                    path : req.body.link,
+                    isVideo:true
+                };
+                await db.ourachievements.insertOne(uploadobj);
+                res.redirect('/admin/ourachievements');
+        }
+        catch(ex)
+        {
+            console.log(ex);
+        }
+res.redirect('/admin/ourachievements');
 })
 
 router.post('/customer/confirm', async (req, res)=> {
@@ -969,6 +1072,22 @@ router.get('/customer/portfolio', async (req, res, next) => {
         showFooter: true
     });
 });
+router.get('/customer/achievements', async (req, res, next) => {
+    const config = req.app.config;
+    const db = req.app.db;
+    var ourachievements = await db.ourachievements.find({}).toArray();
+    res.render(`${config.themeViews}achievements`, {
+        title: 'Contact',
+        config: req.app.config,
+        session: req.session,
+        ourachievements: ourachievements,
+        message: clearSessionValue(req.session, 'message'),
+        messageType: clearSessionValue(req.session, 'messageType'),
+        helpers: req.handlebars.helpers,
+        showFooter: true
+    });
+});
+
 router.get('/customer/registered',async (req, res)=>{
     const config = req.app.config;
     const db = req.app.db;
